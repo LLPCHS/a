@@ -1,0 +1,169 @@
+{
+  "name": "بات پاسخ متنی با گروک",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.grok.x.ai/v1/chat/completions",
+        "sendHeaders": true,
+        "specifyHeaders": "manual",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $credentials.xaiApiKey }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"model\": \"grok-4-latest\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a helpful assistant. Your name is Sam. Response in a friendly and helpful tone in Persian. You are speaking to {{ $('Receive Message').item.json.message.from.first_name }}. Current date and time: {{ $now }}\"}, {\"role\": \"user\", \"content\": \"{{ $json.message.text }}\"}], \"temperature\": 0.7, \"max_tokens\": 500}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -272,
+        368
+      ],
+      "id": "fbc23e83-ef8a-489c-8c65-fe6518f74a2d",
+      "name": "Grok Chat",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "new_xai_cred",
+          "name": "xAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{ $('Receive Message').item.json.message.chat.id }}",
+        "text": "={{ $json.choices[0].message.content }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -80,
+        368
+      ],
+      "id": "a1b2c3d4-e5f6-4789-9abc-def012345678",
+      "name": "Text Response",
+      "webhookId": "9e8f7a6b-5c4d-4321-8bcd-0123456789ab",
+      "credentials": {
+        "telegramApi": {
+          "id": "k3TbsxTKZSpO3HtD",
+          "name": "روبات تست آموزشی"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -464,
+        368
+      ],
+      "id": "80f625a4-a3a3-478c-b644-e7ddf6cdd729",
+      "name": "Receive Message",
+      "webhookId": "66f4989d-27d8-4932-b5cd-cc0cea16c9e3",
+      "credentials": {
+        "telegramApi": {
+          "id": "k3TbsxTKZSpO3HtD",
+          "name": "روبات تست آموزشی"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -368,
+        368
+      ],
+      "id": "87ff4071-44f6-4121-adfa-b64a8220971d",
+      "name": "Is Text?"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Grok Chat": {
+      "main": [
+        [
+          {
+            "node": "Text Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Receive Message": {
+      "main": [
+        [
+          {
+            "node": "Is Text?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Text?": {
+      "main": [
+        [
+          {
+            "node": "Grok Chat",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "540bdf7a-a24a-4b33-9418-51c82dee722e",
+  "meta": {
+    "instanceId": "65c6e929b6d04bd0fd05f34ac16d954875e3d86df906e1267d5be94d8a6b099c"
+  },
+  "id": "noFvgEOHIEyRYQVs",
+  "tags": []
+}
